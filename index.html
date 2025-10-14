@@ -1,0 +1,702 @@
+<artifact identifier="camelot-project-postscript" type="text/html" title="The Camelot Project: PostScript Document Processing Technology">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Camelot Project: PostScript Document Processing Technology</title>
+    <style>
+        :root {
+            --bg: #FAFBFC;
+            --surface: #FFFFFF;
+            --text: #1F2937;
+            --muted: #6B7280;
+            --accent: #2563EB;
+            --accent2: #7C3AED;
+            --border: #E5E7EB;
+            --onAccent: #FFFFFF;
+            --onAccent2: #FFFFFF;
+            --bgGradient: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%);
+            --headingGradient: linear-gradient(135deg, #1E40AF 0%, #7C3AED 100%);
+            
+            --font-family: ui-sans-serif, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+            --font-xs: clamp(12px, 0.7vw, 13px);
+            --font-sm: clamp(14px, 0.8vw, 15px);
+            --font-base: clamp(16px, 1vw, 18px);
+            --font-lg: clamp(20px, 1.4vw, 24px);
+            --font-xl: clamp(26px, 2vw, 34px);
+            
+            --space-1: 8px;
+            --space-2: 12px;
+            --space-3: 16px;
+            --space-4: 24px;
+            --space-5: 32px;
+            --space-6: 48px;
+            
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 18px;
+            
+            --focus-ring: 2px solid var(--accent);
+            --easing: cubic-bezier(.2,.7,.2,1);
+            --duration: 180ms;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font-family);
+            font-size: var(--font-base);
+            line-height: 1.6;
+        }
+
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 6px;
+            background: var(--accent);
+            color: var(--onAccent);
+            padding: 8px;
+            text-decoration: none;
+            border-radius: var(--radius-sm);
+            z-index: 1000;
+        }
+
+        .skip-link:focus {
+            top: 6px;
+        }
+
+        .site-header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: var(--space-4) 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(8px);
+        }
+
+        .header-content {
+            max-width: min(1120px, 92vw);
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: var(--space-4);
+        }
+
+        .site-header h1 {
+            margin: 0;
+            font-size: var(--font-lg);
+            font-weight: 700;
+            background: var(--headingGradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.25;
+        }
+
+        .breadcrumbs {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            font-size: var(--font-sm);
+            color: var(--muted);
+        }
+
+        .breadcrumbs a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .breadcrumbs a:hover {
+            text-decoration: underline;
+        }
+
+        .section-progress {
+            height: 3px;
+            background: var(--border);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 101;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--headingGradient);
+            width: 0%;
+            transition: width 0.1s ease;
+        }
+
+        .shell {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: var(--space-6);
+            max-width: min(1120px, 92vw);
+            margin: 0 auto;
+            padding: var(--space-6) 0;
+        }
+
+        @media (max-width: 860px) {
+            .shell {
+                grid-template-columns: 1fr;
+                gap: var(--space-4);
+            }
+            
+            .toc {
+                order: -1;
+            }
+        }
+
+        .toc {
+            background: var(--surface);
+            border-radius: var(--radius-md);
+            padding: var(--space-4);
+            height: fit-content;
+            position: sticky;
+            top: calc(80px + var(--space-4));
+            border: 1px solid var(--border);
+        }
+
+        .toc h2 {
+            margin: 0 0 var(--space-3) 0;
+            font-size: var(--font-sm);
+            font-weight: 600;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .toc ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .toc li {
+            margin-bottom: var(--space-2);
+        }
+
+        .toc a {
+            display: block;
+            padding: var(--space-2);
+            color: var(--text);
+            text-decoration: none;
+            border-radius: var(--radius-sm);
+            font-size: var(--font-sm);
+            transition: all var(--duration) var(--easing);
+        }
+
+        .toc a:hover {
+            background: var(--bgGradient);
+            color: var(--accent);
+        }
+
+        .toc a[aria-current="true"] {
+            background: var(--accent);
+            color: var(--onAccent);
+            font-weight: 500;
+        }
+
+        main {
+            min-width: 0;
+        }
+
+        section {
+            scroll-margin-top: 96px;
+            margin-bottom: 56px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s var(--easing);
+        }
+
+        section.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            section {
+                opacity: 1;
+                transform: none;
+                transition: none;
+            }
+        }
+
+        .section-header {
+            margin-bottom: var(--space-5);
+        }
+
+        .section-title {
+            font-size: var(--font-xl);
+            font-weight: 700;
+            line-height: 1.25;
+            margin: 0 0 var(--space-3) 0;
+            background: var(--headingGradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .section-summary {
+            font-size: var(--font-lg);
+            color: var(--muted);
+            line-height: 1.4;
+            margin: 0;
+        }
+
+        .content-block {
+            margin-bottom: var(--space-4);
+        }
+
+        .content-block p {
+            margin: 0 0 var(--space-4) 0;
+            line-height: 1.6;
+        }
+
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-6);
+            align-items: start;
+        }
+
+        @media (max-width: 640px) {
+            .two-column {
+                grid-template-columns: 1fr;
+                gap: var(--space-4);
+            }
+        }
+
+        .code-block {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            margin: var(--space-4) 0;
+        }
+
+        .code-header {
+            background: var(--bgGradient);
+            padding: var(--space-3) var(--space-4);
+            border-bottom: 1px solid var(--border);
+            font-size: var(--font-sm);
+            color: var(--muted);
+        }
+
+        .code-content {
+            position: relative;
+        }
+
+        .code-content pre {
+            margin: 0;
+            padding: var(--space-4);
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+            font-size: var(--font-sm);
+            line-height: 1.5;
+            overflow-x: auto;
+        }
+
+        .line-numbers {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 40px;
+            background: var(--bgGradient);
+            border-right: 1px solid var(--border);
+            padding: var(--space-4) var(--space-2);
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+            font-size: var(--font-sm);
+            line-height: 1.5;
+            color: var(--muted);
+            text-align: right;
+            user-select: none;
+        }
+
+        .code-content pre {
+            padding-left: 56px;
+        }
+
+        /* PostScript syntax highlighting */
+        .ps-keyword { color: #0969da; font-weight: 500; }
+        .ps-operator { color: #cf222e; }
+        .ps-number { color: #0550ae; }
+        .ps-comment { color: #6e7781; font-style: italic; }
+        .ps-string { color: #0a3069; }
+
+        .callout {
+            background: var(--bgGradient);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--accent);
+            border-radius: var(--radius-md);
+            padding: var(--space-4);
+            margin: var(--space-4) 0;
+        }
+
+        .callout p {
+            margin: 0;
+            font-weight: 500;
+        }
+
+        .callout + .callout {
+            margin-top: var(--space-3);
+        }
+
+        [contenteditable]:focus-visible {
+            outline: 2px dashed var(--accent);
+            outline-offset: 2px;
+        }
+
+        /* Interactive polygon visualization */
+        .polygon-viz {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: var(--space-5);
+            margin: var(--space-4) 0;
+            text-align: center;
+        }
+
+        .polygon-svg {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .polygon-path {
+            fill: none;
+            stroke: var(--accent);
+            stroke-width: 2;
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            transition: stroke-dashoffset 2s var(--easing);
+        }
+
+        .polygon-path.animate {
+            stroke-dashoffset: 0;
+        }
+
+        .polygon-point {
+            fill: var(--accent2);
+            opacity: 0;
+            transition: opacity 0.3s var(--easing);
+        }
+
+        .polygon-point.visible {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <a href="#main" class="skip-link">Skip to content</a>
+    
+    <div class="section-progress">
+        <div class="progress-bar" id="progress-bar"></div>
+    </div>
+    
+    <header class="site-header" role="banner">
+        <div class="header-content">
+            <h1 data-section-id="title">The Camelot Project: PostScript Document Processing Technology</h1>
+            <nav class="breadcrumbs" aria-label="Breadcrumb">
+                <a href="#overview">Overview</a>
+                <span>→</span>
+                <span>PostScript Technology</span>
+            </nav>
+        </div>
+    </header>
+
+    <div class="shell">
+        <aside class="toc" role="navigation" aria-label="Table of contents">
+            <h2>Contents</h2>
+            <ul>
+                <li><a href="#sec-1" data-toc-link="sec-1">Project Vision and Goals</a></li>
+                <li><a href="#sec-2" data-toc-link="sec-2">Current Technology Limitations</a></li>
+                <li><a href="#sec-3" data-toc-link="sec-3">PostScript Rebinding Concept</a></li>
+                <li><a href="#sec-4" data-toc-link="sec-4">IPS File Format Design</a></li>
+                <li><a href="#sec-5" data-toc-link="sec-5">Device Independence Requirements</a></li>
+            </ul>
+        </aside>
+
+        <main id="main" role="main">
+            <section id="sec-1" data-section-id="1">
+                <div class="section-header">
+                    <h2 class="section-title">Project Vision and Goals</h2>
+                    <p class="section-summary">Introduction to the Camelot Project's mission to solve fundamental communication problems with visual material in modern companies.</p>
+                </div>
+                
+                <div class="content-block">
+                    <p>The Camelot Project represents a foundational initiative to address a critical challenge facing modern organizations: the inability to effectively communicate visual material between different computer applications and systems.</p>
+                </div>
+                
+                <div class="content-block">
+                    <p>While most programs can print to various printers, there exists no universal method to communicate and view printed information across different platforms and environments.</p>
+                </div>
+                
+                <div class="content-block">
+                    <p>This project aims to establish the base technology and methodologies necessary to bridge this fundamental gap in cross-platform visual communication capabilities.</p>
+                </div>
+            </section>
+
+            <section id="sec-2" data-section-id="2">
+                <div class="section-header">
+                    <h2 class="section-title">Current Technology Limitations</h2>
+                    <p class="section-summary">Analysis of why Display PostScript and PostScript solutions fall short in today's computing environment, requiring powerful desktop machines and specialized printers.</p>
+                </div>
+                
+                <div class="content-block">
+                    <p>Display PostScript and PostScript solutions, while technically sound, are not viable for widespread adoption in today's computing environment due to their demanding hardware requirements.</p>
+                </div>
+                
+                <div class="content-block">
+                    <p>These solutions require powerful desktop machines and specialized PostScript printers, making them inaccessible to the vast majority of current users operating with standard hardware configurations.</p>
+                </div>
+                
+                <div class="content-block">
+                    <p>While Display PostScript represents the correct long-term solution as machine capabilities increase over time, it offers minimal assistance to today's users with existing technology constraints.</p>
+                </div>
+            </section>
+
+            <section id="sec-3" data-section-id="3">
+                <div class="section-header">
+                    <h2 class="section-title">PostScript Rebinding Concept</h2>
+                    <p class="section-summary">Detailed explanation of PostScript file processing and rebinding using a 10-sided polygon example to demonstrate derivative file generation.</p>
+                </div>
+                
+                <div class="two-column">
+                    <div>
+                        <div class="content-block">
+                            <p>PostScript rebinding enables the processing of one PostScript file into another form while maintaining equivalent output, creating derivative files that are often simpler and use fewer operators than the original.</p>
+                        </div>
+                        
+                        <div class="content-block">
+                            <p>This procedure demonstrates how PostScript files can have side effects that differ significantly from normal page printing, allowing for the generation of derivative files through the rebinding process.</p>
+                        </div>
+                        
+                        <div class="content-block">
+                            <p>The rebinding operation illustrates a capability of the PostScript language that is infrequently utilized but provides powerful opportunities for file transformation and optimization.</p>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div class="code-block">
+                            <div class="code-header">PostScript procedure that builds a path for a ten-sided polygon using moveto and lineto operators</div>
+                            <div class="code-content">
+                                <div class="line-numbers">
+                                    <div>1</div>
+                                    <div>2</div>
+                                    <div>3</div>
+                                    <div>4</div>
+                                    <div>5</div>
+                                    <div>6</div>
+                                    <div>7</div>
+                                </div>
+                                <pre><code><span class="ps-operator">/</span><span class="ps-keyword">poly</span>
+  <span class="ps-operator">{</span><span class="ps-number">1</span> <span class="ps-number">0</span> <span class="ps-keyword">moveto</span>
+   <span class="ps-operator">/</span><span class="ps-keyword">ang</span> <span class="ps-number">36</span> <span class="ps-keyword">def</span>
+   <span class="ps-number">10</span> <span class="ps-operator">{</span><span class="ps-keyword">ang</span> <span class="ps-keyword">cos</span> <span class="ps-keyword">ang</span> <span class="ps-keyword">sin</span> <span class="ps-keyword">lineto</span>
+       <span class="ps-operator">/</span><span class="ps-keyword">ang</span> <span class="ps-keyword">ang</span> <span class="ps-number">36</span> <span class="ps-keyword">add</span> <span class="ps-keyword">def</span>
+      <span class="ps-operator">}</span><span class="ps-keyword">repeat</span>
+   <span class="ps-operator">}</span><span class="ps-keyword">def</span></code></pre>
+                            </div>
+                        </div>
+                        
+                        <div class="polygon-viz">
+                            <svg class="polygon-svg" width="200" height="200" viewBox="0 0 200 200">
+                                <path id="polygon-path" class="polygon-path" d="M 100,20 L 161.8,38.2 L 190,95 L 161.8,161.8 L 100,190 L 38.2,161.8 L 10,95 L 38.2,38.2 Z"/>
+                                <circle class="polygon-point" cx="100" cy="20" r="3"/>
+                                <circle class="polygon-point" cx="161.8" cy="38.2" r="3"/>
+                                <circle class="polygon-point" cx="190" cy="95" r="3"/>
+                                <circle class="polygon-point" cx="161.8" cy="161.8" r="3"/>
+                                <circle class="polygon-point" cx="100" cy="190" r="3"/>
+                                <circle class="polygon-point" cx="38.2" cy="161.8" r="3"/>
+                                <circle class="polygon-point" cx="10" cy="95" r="3"/>
+                                <circle class="polygon-point" cx="38.2" cy="38.2" r="3"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="sec-4" data-section-id="4">
+                <div class="section-header">
+                    <h2 class="section-title">IPS File Format Design</h2>
+                    <p class="section-summary">Overview of the Intermediate PostScript (IPS) format and binder implementation for capturing and converting PostScript files with font handling solutions.</p>
+                </div>
+                
+                <div class="content-block">
+                    <p>The Intermediate PostScript (IPS) format addresses the critical challenge of font availability by creating self-contained files that include all necessary font information embedded within the document.</p>
+                </div>
+                
+                <div class="content-block">
+                    <p>Current implementations rely on complex font substitution schemes to handle locations lacking appropriate fonts, creating compatibility and fidelity issues across different printing environments.</p>
+                </div>
+                
+                <div class="content-block">
+                    <p>Once the IPS binder is implemented, users can capture any PostScript file from a PostScript driver and convert it to a self-contained IPS file that can be transmitted across networks and printed on any PostScript machine with accompanying management utilities.</p>
+                </div>
+            </section>
+
+            <section id="sec-5" data-section-id="5">
+                <div class="section-header">
+                    <h2 class="section-title">Device Independence Requirements</h2>
+                    <p class="section-summary">Critical requirement for device-independent IPS file format to enable electronic archiving and universal printability across different locations.</p>
+                </div>
+                
+                <div class="callout">
+                    <p>Device independence is essential for IPS files to print on color or black-and-white machines across low and high resolution devices.</p>
+                </div>
+                
+                <div class="callout">
+                    <p>Electronic archiving capabilities enable entire libraries to be stored digitally with guaranteed printability at any location.</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Edit mode support
+        let isEditMode = false;
+
+        window.addEventListener('message', function(event) {
+            if (event.data.type === 'toggle_edit_mode') {
+                isEditMode = event.data.enabled;
+                toggleContentEditable(isEditMode);
+            } else if (event.data.type === 'get_html_content') {
+                window.parent.postMessage({
+                    type: 'html_content',
+                    html: document.documentElement.outerHTML
+                }, '*');
+            }
+        });
+
+        function toggleContentEditable(enabled) {
+            const editableElements = document.querySelectorAll('[data-section-id]');
+            editableElements.forEach(element => {
+                element.contentEditable = enabled ? 'true' : 'false';
+                if (enabled) {
+                    element.style.outline = '1px dashed #3b82f6';
+                    element.style.outlineOffset = '2px';
+                } else {
+                    element.style.outline = 'none';
+                }
+            });
+        }
+
+        document.addEventListener('input', function(e) {
+            if (e.target.contentEditable === 'true' && e.target.dataset.sectionId) {
+                window.parent.postMessage({
+                    type: 'content_change',
+                    sectionId: e.target.dataset.sectionId,
+                    content: e.target.textContent,
+                    elementType: e.target.tagName.toLowerCase()
+                }, '*');
+            }
+        });
+
+        // Smooth scroll navigation
+        document.querySelectorAll('a[href^="#"]').forEach(a => {
+            a.addEventListener('click', e => {
+                const href = a.getAttribute('href');
+                if (!href || href === '#') return;
+                const target = document.querySelector(href);
+                if (!target) return;
+                e.preventDefault();
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        });
+
+        // Progress bar
+        const progressBar = document.getElementById('progress-bar');
+        window.addEventListener('scroll', () => {
+            const max = document.documentElement.scrollHeight - window.innerHeight;
+            const progress = max > 0 ? (window.scrollY / max) * 100 : 0;
+            progressBar.style.width = progress + '%';
+        }, { passive: true });
+
+        // TOC active state
+        const tocLinks = document.querySelectorAll('[data-toc-link]');
+        const sections = document.querySelectorAll('section[id]');
+        
+        const updateActiveTocLink = () => {
+            let current = '';
+            sections.forEach(section => {
+                const rect = section.getBoundingClientRect();
+                if (rect.top <= 120) {
+                    current = section.id;
+                }
+            });
+            
+            tocLinks.forEach(link => {
+                const isActive = link.dataset.tocLink === current;
+                link.setAttribute('aria-current', isActive ? 'true' : 'false');
+            });
+        };
+
+        window.addEventListener('scroll', updateActiveTocLink, { passive: true });
+        updateActiveTocLink();
+
+        // Intersection Observer for animations
+        const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (!reduced) {
+            const io = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                    }
+                });
+            }, { rootMargin: '-10% 0px -10% 0px', threshold: 0.1 });
+
+            document.querySelectorAll('main section').forEach(section => {
+                io.observe(section);
+            });
+
+            // Polygon animation
+            const polygonObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const path = entry.target.querySelector('.polygon-path');
+                        const points = entry.target.querySelectorAll('.polygon-point');
+                        
+                        if (path) {
+                            path.classList.add('animate');
+                            
+                            // Animate points with delay
+                            points.forEach((point, index) => {
+                                setTimeout(() => {
+                                    point.classList.add('visible');
+                                }, index * 200 + 500);
+                            });
+                        }
+                    }
+                });
+            }, { threshold: 0.5 });
+
+            const polygonViz = document.querySelector('.polygon-viz');
+            if (polygonViz) {
+                polygonObserver.observe(polygonViz);
+            }
+        } else {
+            // Show all content immediately for reduced motion
+            document.querySelectorAll('main section').forEach(section => {
+                section.classList.add('is-visible');
+            });
+            
+            const polygonPath = document.querySelector('.polygon-path');
+            const polygonPoints = document.querySelectorAll('.polygon-point');
+            if (polygonPath) {
+                polygonPath.classList.add('animate');
+                polygonPoints.forEach(point => point.classList.add('visible'));
+            }
+        }
+    </script>
+</body>
+</html>
+</artifact>
